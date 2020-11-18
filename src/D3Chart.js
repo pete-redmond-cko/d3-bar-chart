@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import React, { useRef, useState, useEffect } from 'react';
 
 const MARGIN = { TOP: 10, BOTTOM: 50, LEFT: 70, RIGHT: 10 }
 const WIDTH = 800 - MARGIN.LEFT - MARGIN.RIGHT;
@@ -44,10 +43,9 @@ export default class D3Chart {
 
         vis.menData = datasets[0]
         vis.womenData = datasets[1]
-
     }
 
-    update({gender, selectedPerson, setSelectedPerson}) {
+    update({gender, selectedPerson, toggleSelectedPerson}) {
 
         const vis = this
 
@@ -73,8 +71,7 @@ export default class D3Chart {
         vis.yAxisGroup.transition().duration(500).call(yAxisCall)
 
         // DATA JOIN
-        const rects = vis.svg.selectAll("rect")
-            .data(vis.data)
+        const rects = vis.svg.selectAll("rect");
 
         // EXIT
         rects.exit()
@@ -90,11 +87,8 @@ export default class D3Chart {
             .attr("width", x.bandwidth)
             .attr("height", d => HEIGHT - y(d.height))
             .attr("fill",(e)=> {
-                console.log('selected person', e)
-                if( selectedPerson.includes(e.name)) {
-                    return 'green'
-                }else {
-                return 'grey'}})
+                return  selectedPerson.includes(e.name) ? 'green' :'grey';
+            });
 
         // ENTER
 
@@ -102,26 +96,17 @@ export default class D3Chart {
 // .enter() uses the current selection as the parent node for the elements added with .append().
 // .append() can be used to add more than svg elements.
 
-        rects.data(this.data).enter().append("rect")
+        rects
+        .data(this.data).enter().append("rect")
             .attr("x", d => x(d.name))
             .attr("width", x.bandwidth)
-				// https://stackoverflow.com/questions/42245210/how-to-properly-implement-d3-svg-click-with-react?rq=1
-				// http://jonathansoma.com/tutorials/d3/clicking-and-hovering/
             .on("click", function(event, d, i) {
-                console.log("click", d);
-              setSelectedPerson(d)
-            })
+            //   event.stopPropagation();
 
-            // .on("mouseover", function() {
-            //  d3.select(this)
-            //      .attr("fill", "red");
-			// })
-			// // will break the selected items
-            // .on("mouseout", function(d, i) {
-            //  d3.select(this)
-            //      .attr("fill", "grey");
-            // })
-        
+              
+
+            toggleSelectedPerson(d.name)
+            })
             .attr("y", HEIGHT)
             .transition().duration(500)
                 .attr("height", d => HEIGHT - y(d.height))
